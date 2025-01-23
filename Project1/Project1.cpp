@@ -183,7 +183,16 @@ void PerformTransaction(enTransactionChoice Choice)
         PrintClientCard(Client);
         double DepositAmount = ReadDepositAmount();
 
-        DepositAmount = (Choice == enDeposit) ? DepositAmount : -1 * DepositAmount;
+        if (Choice == enTransactionChoice::WithDraw)
+        {
+            while (DepositAmount > Client.Balance)
+            {
+                cout << "Invalid Draw Amount, you can draw up to: " << Client.Balance << endl;
+                DepositAmount = ReadDepositAmount();
+            }
+            DepositAmount = -1 * DepositAmount;
+
+        }
 
         char PerformTransaction = 'n';
         cout << "Are you sure you want to perform this transaction? y/n: ";
@@ -195,12 +204,7 @@ void PerformTransaction(enTransactionChoice Choice)
 
             vClients = SaveClientsDataToFile(ClientsFileName, vClients);
 
-            if(Choice == enDeposit)
-                cout << "Deposit";
-            if(Choice == WithDraw)
-                cout << "WithDraw";
-
-            cout <<" Done Successfully." << endl;
+            cout <<"Transaction Done Successfully." << endl;
 
             FindClientByAccountNumber(AccountNumber, vClients, Client);
 
