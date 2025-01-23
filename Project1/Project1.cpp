@@ -65,10 +65,66 @@ void EndProgram()
     cout << "----------------------------------------\n";
 }
 
-void StartProgram()
+
+void ShowAllClientsScreen()
 {
     vector<sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
+    ShowAllClients(vClients);
+}
 
+void ShowAddNewClientScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\tAdd New Client Screen.\n";
+    cout << "----------------------------------------\n";
+    vector<sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
+    ReadCLients(vClients);
+    vClients = LoadClientsDataFromFile(ClientsFileName);
+}
+
+void ShowDeleteClientScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\tDelete Client Screen.\n";
+    cout << "----------------------------------------\n";
+    vector<sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
+    string AccountNumber = ReadClientAccountNumber();
+    DeleteClientByAccountNumber(AccountNumber, vClients);
+    vClients = LoadClientsDataFromFile(ClientsFileName);
+}
+
+void ShowUpdateClientScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\tUpdate Client Screen.\n";
+    cout << "----------------------------------------\n";
+    vector<sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
+    string AccountNumber = ReadClientAccountNumber();
+    UpdateClientByAccountNumber(AccountNumber, vClients);
+    vClients = LoadClientsDataFromFile(ClientsFileName);
+}
+
+void ShowFindClientScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\tFind Client Screen.\n";
+    cout << "----------------------------------------\n";
+    vector<sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
+    sClient Client;
+
+    string AccountNumber = ReadClientAccountNumber();
+    if (FindClientByAccountNumber(AccountNumber, vClients, Client))
+    {
+        PrintClientCard(Client);
+    }
+    else {
+        cout << "Client with Account Number (" << AccountNumber << ") Was Not Found!\n\n";
+    }
+}
+
+
+void StartProgram()
+{
     enChoice UserChoice; 
     do
     {
@@ -76,49 +132,35 @@ void StartProgram()
 
         ShowMainMenu();
         UserChoice = ReadUserChoice();
-        sClient Client;
-        string AccountNumber;
 
         switch (UserChoice)
         {
         case ShowAll:
             system("cls");
-            ShowAllClients(vClients);
+            ShowAllClientsScreen();
             PauseSystem();
             break;
         case Add:
             system("cls");
-            ReadCLients(vClients);
-            vClients = LoadClientsDataFromFile(ClientsFileName);
+            ShowAddNewClientScreen();
             PauseSystem();
 
             break;
         case Delete:
             system("cls");
-            AccountNumber = ReadClientAccountNumber();
-            DeleteClientByAccountNumber(AccountNumber, vClients);
-            vClients = LoadClientsDataFromFile(ClientsFileName);
+            ShowDeleteClientScreen();
             PauseSystem();
 
             break;
         case Update:
             system("cls");
-            AccountNumber = ReadClientAccountNumber();
-            UpdateClientByAccountNumber(AccountNumber, vClients);
-            vClients = LoadClientsDataFromFile(ClientsFileName);
+            ShowUpdateClientScreen();
             PauseSystem();
 
             break;
         case Find:
             system("cls");
-            AccountNumber = ReadClientAccountNumber();
-            if (FindClientByAccountNumber(AccountNumber, vClients, Client))
-            {
-                PrintClientCard(Client);
-            }
-            else {
-                cout << "Client with Account Number (" << AccountNumber << ") Was Not Found!\n\n";
-            }
+            ShowFindClientScreen();
             PauseSystem();
 
             break;
@@ -369,7 +411,7 @@ void ReadCLients(vector<sClient> vClients)
 
     while (toupper(ReadMore) == 'Y')
     {
-        system("cls");
+
 
         cout << "Adding new CLient:\n\n";
 
