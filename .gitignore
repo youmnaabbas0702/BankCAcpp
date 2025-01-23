@@ -1,0 +1,50 @@
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.vcxproj.filters
+*.suo
+*.user
+*.userosscache
+*.unsuccessfulbuild
+*.ncb
+*.obj
+*.pch
+*.idb
+*.pdb
+*.ipch
+*.aps
+*.ilk
+*.log
+*.tlb
+*.tli
+*.dll
+*.exe
+*.plg
+*.vscode/
+
+# Build Directories
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.o
+*.out
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+*.cmake
+
+# Package management
+*.nuget/
+packages/
+
+# Others
+*.tmp
+*.log
+*.tlog
+*.lastbuildstate
+*.opendb
+*.VC.db
+*.VC.opendb
