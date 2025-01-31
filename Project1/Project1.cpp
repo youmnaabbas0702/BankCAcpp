@@ -6,10 +6,12 @@
 
 using namespace std;
 
-enum enChoice{ShowAll = 1, Add, Delete, Update, Find, Transactions, Exit};
+enum enChoice{ShowAll = 1, Add, Delete, Update, Find, Transactions, ManageUsers, Logout};
 enum enTransactionChoice{enDeposit = 1, WithDraw, TotalBalances, MainMenu};
+enum enUserManagementChoice { ListUsers = 1, AddUser, DeleteUser, UpdateUser, FindUser, UsersMainMenu };
 
 const string ClientsFileName = "Clients.txt";
+const string UsersFileName = "Users.txt";
 
 struct sClient
 {
@@ -18,6 +20,14 @@ struct sClient
     string Name;
     string Phone;
     double Balance;
+    bool MarkForDelete = false;
+};
+
+struct stUser
+{
+    string UserName;
+    string Password;
+    int Permissions;
     bool MarkForDelete = false;
 };
 
@@ -32,6 +42,18 @@ bool Deposit(vector<sClient>& , string , double );
 string ReadClientAccountNumber();
 vector <sClient> SaveClientsDataToFile(string , vector<sClient> );
 
+
+bool Login(string, stUser&);
+vector <stUser> LoadUsersDataFromFile(string);
+void ShowAllUsers(vector<stUser>);
+void ReadUsers(vector<stUser>);
+bool FindUserByUserName(string, vector<stUser>, stUser&);
+void PrintUserCard(stUser);
+bool DeleteUserByUserName(string, vector<stUser>&);
+bool UpdateUserByUserName(string, vector<stUser>&);
+void StartProgram();
+
+
 void ShowMainMenu()
 {
     cout << "=======================================================\n";
@@ -43,7 +65,8 @@ void ShowMainMenu()
     cout << "\t\t[4] Update Client Info.\n";
     cout << "\t\t[5] Find Client.\n";
     cout << "\t\t[6] Transactions.\n";
-    cout << "\t\t[7] Exit.\n";
+    cout << "\t\t[7] Manage Users.\n";
+    cout << "\t\t[8] LogOut.\n";
     cout << "=======================================================\n";
 
 }
@@ -51,7 +74,7 @@ void ShowMainMenu()
 enChoice ReadUserChoice()
 {
     short Choice;
-    cout << "Choose what do you want to do? [1 to 7]? ";
+    cout << "Choose what do you want to do? [1 to 8]? ";
     cin >> Choice;
     return enChoice(Choice);
 }
@@ -64,17 +87,23 @@ enTransactionChoice ReadTransactionChoice()
     return enTransactionChoice(Choice);
 }
 
+enUserManagementChoice ReadUserManagementChoice()
+{
+    short Choice;
+    cout << "Choose what do you want to do? [1 to 6]? ";
+    cin >> Choice;
+    return enUserManagementChoice(Choice);
+}
+
 void PauseSystem()
 {
     cout << "Press any key to go back to Main Menu...";
     system("pause>0");
 }
 
-void EndProgram()
+void LogOut()
 {
-    cout << "----------------------------------------\n";
-    cout << "\t\tProgram Ends :-)\n";
-    cout << "----------------------------------------\n";
+    StartProgram();
 }
 
 
@@ -289,8 +318,171 @@ void PerformTransactions()
     } while (Choice != enTransactionChoice::MainMenu);
 }
 
+
+
+
+void ShowUserManagementMenu()
+{
+    cout << "=======================================================\n";
+    cout << "\t\tUser Management Menu Screen\n";
+    cout << "=======================================================\n";
+    cout << "\t\t[1] List Users.\n";
+    cout << "\t\t[2] Add User.\n";
+    cout << "\t\t[3] Delete User.\n";
+    cout << "\t\t[4] Update User.\n";
+    cout << "\t\t[5] Find User.\n";
+    cout << "\t\t[6] Main Menu.\n";
+    cout << "=======================================================\n";
+}
+
+void PauseUserManagementScreen()
+{
+    cout << "Press any key to go back to User Management Menu...";
+    system("pause>0");
+}
+
+string ReadUserName()
+{
+    string UserName;
+    cout << "Enter User Name: ";
+    cin >> UserName;
+
+    return UserName;
+}
+
+void ShowAddNewUserScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\tAdd New User Screen.\n";
+    cout << "----------------------------------------\n";
+    vector<stUser> vUsers = LoadUsersDataFromFile(UsersFileName);
+    ReadUsers(vUsers);
+}
+
+void ShowDeleteUserScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\tDelete User Screen.\n";
+    cout << "----------------------------------------\n";
+    vector<stUser> vUsers = LoadUsersDataFromFile(UsersFileName);
+    string UserName = ReadUserName();
+    DeleteUserByUserName(UserName, vUsers);
+}
+
+void ShowUpdateUserScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\tUpdate User Screen.\n";
+    cout << "----------------------------------------\n";
+    vector<stUser> vUsers = LoadUsersDataFromFile(UsersFileName);
+    string UserName = ReadUserName();
+    UpdateUserByUserName(UserName, vUsers);
+}
+
+void ShowFindUserScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\tFind User Screen.\n";
+    cout << "----------------------------------------\n";
+    vector<stUser> vUsers = LoadUsersDataFromFile(UsersFileName);
+
+    stUser User;
+
+    string UserName = ReadUserName();
+    if (FindUserByUserName(UserName, vUsers, User))
+    {
+        PrintUserCard(User);
+    }
+    else {
+        cout << "User With User Name (" << UserName << ") Was Not Found!\n\n";
+    }
+}
+
+void PerformUserManagement()
+{
+    enUserManagementChoice Choice;
+    do
+    {
+        system("cls");
+        ShowUserManagementMenu();
+        Choice = ReadUserManagementChoice();
+        vector<stUser> vUsers = LoadUsersDataFromFile(UsersFileName);
+
+        switch (Choice)
+        {
+        case ListUsers:
+            system("cls");
+            ShowAllUsers(vUsers);
+            PauseUserManagementScreen();
+            break;
+        case AddUser:
+            system("cls");
+            ShowAddNewUserScreen();
+            PauseUserManagementScreen();
+            break;
+        case DeleteUser:
+            system("cls");
+            ShowDeleteUserScreen();
+            PauseUserManagementScreen();
+            break;
+        case UpdateUser:
+            system("cls");
+            ShowUpdateUserScreen();
+            PauseUserManagementScreen();
+            break;
+        case FindUser:
+            system("cls");
+            ShowFindUserScreen();
+            PauseUserManagementScreen();
+            break;
+
+        case UsersMainMenu:
+            break;
+        default:
+            break;
+        }
+    } while (Choice != enUserManagementChoice::UsersMainMenu);
+}
+
+void ShowLoginScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "\t\Login Screen.\n";
+    cout << "----------------------------------------\n";
+
+}
+
+void ShowAccessDeniedScreen()
+{
+    cout << "----------------------------------------\n";
+    cout << "Access Denied,\n";
+    cout << "You don't have the permission to do this,\n";
+    cout << "Please Contact your admin.\n";
+    cout << "----------------------------------------\n";
+}
+
+
+
+
 void StartProgram()
 {
+    stUser User;
+    bool Logged = false;
+
+    ShowLoginScreen();
+    do
+    {
+        if (!(Login(UsersFileName, User)))
+        {
+            system("cls");
+            ShowLoginScreen();
+            cout << "Invlaid UserName/Password!" << endl;
+        }
+        else
+            Logged = true;
+
+    } while (!Logged);
+
     enChoice UserChoice; 
     do
     {
@@ -303,48 +495,80 @@ void StartProgram()
         {
         case ShowAll:
             system("cls");
-            ShowAllClientsScreen();
+            if ((User.Permissions & 1) == 0)
+                ShowAccessDeniedScreen();
+            else
+                ShowAllClientsScreen();
             PauseSystem();
             break;
         case Add:
             system("cls");
-            ShowAddNewClientScreen();
+            if ((User.Permissions & 2) == 0)
+                ShowAccessDeniedScreen();
+            else
+                ShowAddNewClientScreen();
             PauseSystem();
-
             break;
         case Delete:
             system("cls");
-            ShowDeleteClientScreen();
+            if ((User.Permissions & 4) == 0)
+                ShowAccessDeniedScreen();
+            else
+                ShowDeleteClientScreen();
             PauseSystem();
 
             break;
         case Update:
             system("cls");
-            ShowUpdateClientScreen();
+            if ((User.Permissions & 8) == 0)
+                ShowAccessDeniedScreen();
+            else
+                ShowUpdateClientScreen();
             PauseSystem();
 
             break;
         case Find:
             system("cls");
-            ShowFindClientScreen();
+            if ((User.Permissions & 16) == 0)
+                ShowAccessDeniedScreen();
+            else
+                ShowFindClientScreen();
             PauseSystem();
 
             break;
-        
+
         case Transactions:
             system("cls");
-            PerformTransactions();
+            if ((User.Permissions & 32) == 0)
+            {
+                ShowAccessDeniedScreen();
+                PauseSystem();
+            }
+            else
+                PerformTransactions();
 
             break;
-        case Exit:
+        case ManageUsers:
             system("cls");
-            EndProgram();
+            if ((User.Permissions & 64) == 0)
+            {
+                ShowAccessDeniedScreen();
+                PauseSystem();
+            }
+            else
+                PerformUserManagement();
+            break;
+
+            break;
+        case Logout:
+            system("cls");
+            LogOut();
             break;
         default:
             break;
         }
 
-    } while (UserChoice != enChoice::Exit);
+    } while (UserChoice != enChoice::Logout);
 
     
 }
@@ -678,4 +902,340 @@ bool Deposit(vector<sClient> &vClients, string AccountNumber, double Amount)
         }
     }
     return false;
+}
+
+
+
+
+
+stUser ConvertUserLinetoRecord(string Line, string Seperator = "#//#")
+{
+    stUser User;
+    vector<string> vUserData;
+    vUserData = Split(Line, Seperator);
+    User.UserName = vUserData[0];
+    User.Password = vUserData[1];
+    User.Permissions = stoi(vUserData[2]);
+
+    return User;
+}
+
+string ConvertUserRecordToLine(stUser User, string Seperator = "#//#")
+{
+    string stUserRecord = "";
+    stUserRecord += User.UserName + Seperator;
+    stUserRecord += User.Password + Seperator;
+    stUserRecord += to_string(User.Permissions);
+
+    return stUserRecord;
+}
+
+vector <stUser> LoadUsersDataFromFile(string FileName)
+{
+    vector <stUser> vUsers;
+    fstream MyFile;
+    MyFile.open(FileName, ios::in);//read Mode
+    if (MyFile.is_open())
+    {
+        string Line;
+        stUser User;
+        while (getline(MyFile, Line))
+        {
+            User = ConvertUserLinetoRecord(Line);
+            vUsers.push_back(User);
+        }
+        MyFile.close();
+    }
+    return vUsers;
+}
+
+vector<stUser> SaveUsersDataToFile(string FileName, vector<stUser> vUsers)
+{
+    fstream MyFile;
+    MyFile.open(FileName, ios::out);//overwrite
+    string DataLine;
+    if (MyFile.is_open())
+    {
+        for (stUser U : vUsers)
+        {
+            if (U.MarkForDelete == false)
+            {
+                //we only write records that are not marked fordelete.
+                DataLine = ConvertUserRecordToLine(U);
+                MyFile << DataLine << endl;
+            }
+        }
+        MyFile.close();
+    }
+    return vUsers;
+}
+
+stUser ReadUserCredentials()
+{
+    stUser User;
+    cout << "Enter UserName: ";
+    cin >> User.UserName;
+    cout << "Enter Password: ";
+    cin >> User.Password;
+
+    return User;
+}
+
+bool Login(string UsersFileName, stUser& User)
+{
+    vector<stUser> vUsers = LoadUsersDataFromFile(UsersFileName);
+
+    User = ReadUserCredentials();
+
+    for (stUser U : vUsers)
+    {
+        if (U.UserName == User.UserName && U.Password == User.Password)
+        {
+            User = U;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+void PrintUserRecord(stUser User)
+{
+    cout << left << "|" << setw(16) << User.UserName
+        << "|" << setw(10) << User.Password << "|"
+        << setw(50) << User.Permissions << endl;
+}
+
+void ShowAllUsers(vector<stUser> vUsers)
+{
+    cout << "\t\t\t\t\t" << "Users List(" << vUsers.size() << ") User(s)." << endl;
+    cout << "---------------------------------------------------------------------------------------------------------------\n";
+    cout << left << "|" << setw(16) << "User Name" << "|" << setw(10)
+        << "Password" << "|" << setw(15) << "Permissions\n";
+    cout << "---------------------------------------------------------------------------------------------------------------\n";
+
+    for (stUser User : vUsers)
+    {
+        PrintUserRecord(User);
+    }
+    cout << "---------------------------------------------------------------------------------------------------------------\n";
+
+}
+
+void PrintUserCard(stUser User)
+{
+    cout << "\nThe following are the user details:\n";
+    cout << "\nUser Name : " << User.UserName;
+    cout << "\nPassword : " << User.Password;
+    cout << "\nPermissions : " << User.Permissions;
+    cout << endl;
+}
+
+int ReadUserPermissions()
+{
+    char fullaccess = ' ';
+    int permissions = 0;
+
+    cout << "Dou you want to give full access, y/n?";
+    cin >> fullaccess;
+    if (tolower(fullaccess) == 'y')
+        return -1;
+    else
+    {
+        cout << "do you want to give acess to:\n";
+        char access = ' ';
+        cout << "show client list? y/n: ";
+        cin >> access;
+        if (tolower(access) == 'y')
+            permissions = permissions | 1;
+        cout << "add new client? y/n: ";
+        cin >> access;
+        if (tolower(access) == 'y')
+            permissions = permissions | 2;
+        cout << "delete client? y/n: ";
+        cin >> access;
+        if (tolower(access) == 'y')
+            permissions = permissions | 4;
+        cout << "update client? y/n: ";
+        cin >> access;
+        if (tolower(access) == 'y')
+            permissions = permissions | 8;
+        cout << "find client? y/n: ";
+        cin >> access;
+        if (tolower(access) == 'y')
+            permissions = permissions | 16;
+        cout << "transactions? y/n: ";
+        cin >> access;
+        if (tolower(access) == 'y')
+            permissions = permissions | 32;
+        cout << "user management? y/n: ";
+        cin >> access;
+        if (tolower(access) == 'y')
+            permissions = permissions | 64;
+
+    }
+
+    return permissions;
+}
+
+stUser ReadNewUser()
+{
+    stUser Record;
+
+    cout << "Enter Passowrd? ";
+    getline(cin >> ws, Record.Password);
+
+    Record.Permissions = ReadUserPermissions();
+    return Record;
+}
+
+bool AddNewUser(string User_Name, vector<stUser> vUsers)
+{
+    stUser User;
+    if (FindUserByUserName(User_Name, vUsers, User))
+    {
+        cout << "The User already exist!" << endl;
+        PrintUserCard(User);
+        return false;
+    }
+    else
+    {
+        User = ReadNewUser();
+        User.UserName = User_Name;
+        AddDataLineToFile(UsersFileName, ConvertUserRecordToLine(User));
+        return true;
+    }
+}
+
+void ReadUsers(vector<stUser> vUsers)
+{
+    char ReadMore = 'y';
+
+    while (toupper(ReadMore) == 'Y')
+    {
+
+
+        cout << "Adding new User:\n\n";
+
+        string UserName = ReadUserName();
+        if (AddNewUser(UserName, vUsers))
+        {
+            cout << "user added successfully.";
+        }
+        cout << " Do you want to add more users? y/n: ";
+        cin >> ReadMore;
+    }
+}
+
+bool FindUserByUserName(string UserName, vector<stUser> vUsers, stUser& User)
+{
+
+    for (stUser U : vUsers)
+    {
+        if (U.UserName == UserName)
+        {
+            User = U;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool MarkUserForDeleteByUserName(string User_Name, vector <stUser>& vUsers)
+{
+    for (stUser& U : vUsers)
+    {
+        if (U.UserName == User_Name)
+        {
+            U.MarkForDelete = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool DeleteUserByUserName(string UserName, vector<stUser>& vUsers)
+{
+    if (UserName == "Admin")
+    {
+        cout << "You Cannot Delete this user." << endl;
+        return false;
+    }
+
+    stUser User;
+    char Answer = 'n';
+    if (FindUserByUserName(UserName, vUsers, User))
+    {
+        PrintUserCard(User);
+        cout << "\n\nAre you sure you want delete this user? y/n ? ";
+        cin >> Answer;
+        if (Answer == 'y' || Answer == 'Y')
+        {
+            MarkUserForDeleteByUserName(UserName, vUsers);
+            SaveUsersDataToFile(UsersFileName, vUsers);
+            //Refresh Users
+            vUsers = LoadUsersDataFromFile(UsersFileName);
+            cout << "\n\nUser Deleted Successfully." << endl;
+            return true;
+        }
+    }
+    else
+    {
+        cout << "\nUser with User Name (" << UserName << ") is Not Found!" << endl;
+        return false;
+    }
+}
+
+void ReadUserUpdatedData(stUser& Record)
+{
+    cout << "Enter Password? ";
+    getline(cin >> ws, Record.Password);
+    Record.Permissions = ReadUserPermissions();
+}
+
+bool UpdateUserInfo(string User_Name, vector <stUser>& vUsers)
+{
+    for (stUser& U : vUsers)
+    {
+        if (U.UserName == User_Name)
+        {
+            ReadUserUpdatedData(U);
+            break;
+        }
+    }
+    return false;
+}
+
+bool UpdateUserByUserName(string UserName, vector<stUser>& vUsers)
+{
+    if (UserName == "Admin")
+    {
+        cout << "You Cannot Update this user." << endl;
+        return false;
+    }
+
+    stUser User;
+    char Answer = 'n';
+
+    if (FindUserByUserName(UserName, vUsers, User))
+    {
+        PrintUserCard(User);
+        cout << "\n\nAre you sure you want update this user? y/n ? ";
+        cin >> Answer;
+        if (Answer == 'y' || Answer == 'Y')
+        {
+            UpdateUserInfo(UserName, vUsers);
+            SaveUsersDataToFile(UsersFileName, vUsers);
+
+            cout << "\n\nUser Updated Successfully." << endl;
+            return true;
+        }
+    }
+    else
+    {
+        cout << "\nUser with User Name (" << UserName << ") is Not Found!" << endl;
+        return false;
+    }
 }
